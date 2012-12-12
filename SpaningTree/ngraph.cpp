@@ -10,6 +10,11 @@ using std::find_if;
 using std::swap;
 #include <cassert>
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
+
 #include "ngraph.h"
 
 
@@ -22,6 +27,22 @@ NGraph::NGraph(NGraph& g)
 {
 	vertexs = g.vertexs;
 	edges = g.edges;
+}
+
+void NGraph::Print()
+{
+	cout << "Edges:" << edges.size() << endl;
+	for(auto it=edges.begin(),et=edges.end();it!=et;it++)
+	{
+		cout << (*it) << "\t";
+	}
+	cout << endl;
+	cout << "Vertexs:" << vertexs.size() << endl;
+	for(auto it=vertexs.begin(),et=vertexs.end();it!=et;it++)
+	{
+		cout << (*it) << "\n";
+	}
+	cout << endl;
 }
 
 void NGraph::FindTwoV(int eindex, es_it& it, int& vp, int& vn)

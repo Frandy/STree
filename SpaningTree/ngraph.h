@@ -13,9 +13,6 @@ using std::list;
 
 #include "edge.h"
 
-class NGVertex;
-class NGraph;
-
 class NGVertex
 {
 public:
@@ -24,8 +21,18 @@ public:
 	list<int> edges;
 public:
 	NGVertex()=default;
+	NGVertex(int v,list<int>& es):vertex(v),edges(es){Degree();}
 	// update degree
 	void Degree();
+	friend ostream& operator << (ostream& out,const NGVertex& vt)
+	{
+		out << vt.vertex << ":";
+		for(auto it=vt.edges.begin(),et=vt.edges.end();it!=et;it++)
+		{
+			out << (*it) << ",";
+		}
+		return out;
+	}
 };
 
 /*
@@ -47,7 +54,9 @@ public:
 	NGraph()=default;
 	// copy construct
 	NGraph(NGraph& g);
-public:
+
+	void Print();
+
 	// short & open operation for the graph
 	bool Short(int eindex);
 	bool Open(int eindex);
