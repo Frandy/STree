@@ -11,113 +11,55 @@
 class NSTNode
 {
 public:
-	int edgeIndex;
+	int eindex;
 	NGraph* graph;
 
 	NSTNode* pl;
 	NSTNode* pr;
+
+	bool mark;
 };
 
 class NSTree
 {
 public:
-	// the original graph
-	NGraph* origin;
-	// root node
-	NSTNode* root;
-	// working layer
-	queue<NSTNode*> layer;
-	unordered_map<NGraph*,NSTNode*> sharedNGraph;
-	unordered_map<NSTNode*,NSTNode*> sharedNodeMap;
+	NGraph* origin;									// the original graph
+	NSTNode* root;									// root node
+	list<NSTNode*> nodes;							// all nodes
+	list<NGraph*> graphs;							// all graphs
+private:
+	NSTNode* pZeroNSTNode;							// leaf node, zero & one
+	NSTNode* pOneNSTNode;
+	queue<NSTNode*> layer;							// working layer
+
+//	unordered_map<NGraph*,NSTNode*> sharedNGraph;
+//	unordered_map<NSTNode*,NSTNode*> sharedNodeMap;
+
+public:
+	// construct
+	NSTree()=default;
+	NSTree(NGraph* g);
+	~NSTree();
+	// build
+	void BFSBuild();
+
+	void Reduce();
+	void ZSupress();
+
+	// release memory of graph & node
+	void ReleaseAllGraph();
+	void ReleaseAllNode();
 
 private:
 	// find the vertex with minimum degree
-	void FindMinDegV(NGraph* graph,NGraph::ngv_it& minv)
-	{
-		auto it = graph->vertexs.begin(),et=graph->vertexs.end();
-		minv = it++;
-		for(;it!=et;it++)
-		{
-			if((it->degree)<minv->degree)
-			{
-				minv = it;
-			}
-		}
-	}
-public:
-	NSTNode* HOpen(NGraph* graph)
-	{
-		/*
-		 * if graph in sharedNGraph,
-		 * 		return sharedNGraph[graph]
-		 * to built horizontal,
-		 *		find the minimal degree node,
-		 *		//open edges on this node,
-		 *		//	the first node, <= the first edge & the graph
-		 *		//	other nodes, <= edge & the open-previous-edge graph
-		 *
-		 *		for edge in this node,
-		 *			if edge & graph pair in sharedNodeMap,
-		 *				share the left, and do not push into queue,
-		 *			else,
-		 *				create NSTNode, push into queue and sharedNodeMap
-		 *				hash graph and node,
-		 *				hash edge & graph pair and node
-		 *			graph open edge
-		 *	return the first node, to be the left
-		 *
-		 */
-		NGraph::ngv_it minv;
-		FindMinDegV(graph,minv);
-		auto it = minv->edges.begin();
+	void FindMinDegV(NGraph* graph,NGraph::ngv_it& minv);
 
-		int ce = *it;
-		NGraph* cg = graph;
-		NSTNode* first = new NSTNode(ce,cg);
-		NSTNode* cn = first;
+	// open edges
+	NSTNode* HOpen(NGraph* graph);
 
-		it++;
-		for(auto et=minv->edges.end();it!=et;it++)
-		{
-			cg = new NGraph(*cg);			// new NGraph
-			cg->Open(ce);
-			ce = *it;
-			cn->pr = new NSTNode(ce,cg);	// new NSTnode
-			cn = cn->pr;
-		}
-		cn->pr = pZeroNSTNode;
+	// short edges
+	void VShort(NSTNode* node);
 
-		return first;
-	}
-	void VShort(NSTNode* node)
-	{
-		/*
-		 * if node.graph short node.edge => 1
-		 * 		node->pl = 1
-		 * 	else
-		 * 		node->pl = HOpen(node.graph)
-		 */
-		NGraph* cg = new NGraph(*node.graph);
-		if(cg->Short(node.eindex))
-		{
-			node->pl = pOneNSTNode;
-			delete cg;
-		}
-		else
-		{
-			node->pl = HOpen(cg);
-		}
-	}
-	void BFSBuild()
-	{
-		root = HOpen(origin);
-		while(!queue.empty())
-		{
-			node = queue.front();
-			VShort(node);
-			queue.pop();
-		}
-	}
 };
 
 #endif /* NSTREE_H_ */
