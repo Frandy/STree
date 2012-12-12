@@ -7,4 +7,8 @@
 
 #include "nstree.h"
 
-
+int main()
+{
+	NSTree a;
+	return 0;
+}

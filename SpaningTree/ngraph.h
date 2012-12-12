@@ -50,7 +50,7 @@ public:
 public:
 	// short & open operation for the graph
 	bool Short(int eindex);
-	void Open(int eindex);
+	bool Open(int eindex);
 private:
 	// basic operation for short & open
 	// find the target edge & its two vertex

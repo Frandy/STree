@@ -8,6 +8,14 @@
 #ifndef NSTREE_H_
 #define NSTREE_H_
 
+#include <list>
+using std::list;
+#include <queue>
+using std::queue;
+
+#include "ngraph.h"
+class NGraph;
+
 class NSTNode
 {
 public:
@@ -18,6 +26,10 @@ public:
 	NSTNode* pr;
 
 	bool mark;
+
+public:
+	NSTNode()=default;
+	NSTNode(int e,NGraph* g);
 };
 
 class NSTree

@@ -5,7 +5,18 @@
  *      Author: chjd
  */
 
-NSTree::NSTree(NGraph* g):origin(g),root(nullptr){}
+#include "ngraph.h"
+#include "nstree.h"
+
+NSTNode::NSTNode(int e, NGraph* g) :
+	eindex(e), graph(g), pl(nullptr), pr(nullptr),mark(false)
+{
+}
+
+NSTree::NSTree(NGraph* g) :
+	origin(g), root(nullptr)
+{
+}
 
 NSTree::~NSTree()
 {
@@ -15,7 +26,7 @@ NSTree::~NSTree()
 
 void NSTree::ReleaseAllGraph()
 {
-	for(auto it=graphs.begin(),et=graphs.end();it!=et;it++)
+	for (auto it = graphs.begin(), et = graphs.end(); it != et; it++)
 	{
 		delete (*it);
 		(*it) = nullptr;
@@ -25,7 +36,7 @@ void NSTree::ReleaseAllGraph()
 
 void NSTree::ReleaseAllNode()
 {
-	for(auto it=nodes.begin(),et=nodes.end();it!=et;it++)
+	for (auto it = nodes.begin(), et = nodes.end(); it != et; it++)
 	{
 		delete (*it);
 		(*it) = nullptr;
@@ -33,8 +44,7 @@ void NSTree::ReleaseAllNode()
 	nodes.clear();
 }
 
-
-void NSTNode::FindMinDegV(NGraph* graph, NGraph::ngv_it& minv)
+void NSTree::FindMinDegV(NGraph* graph, NGraph::ngv_it& minv)
 {
 	auto it = graph->vertexs.begin(), et = graph->vertexs.end();
 	minv = it++;
@@ -47,7 +57,7 @@ void NSTNode::FindMinDegV(NGraph* graph, NGraph::ngv_it& minv)
 	}
 }
 
-NSTNode* NSTNode::HOpen(NGraph* graph)
+NSTNode* NSTree::HOpen(NGraph* graph)
 {
 	/*
 	 * if graph in sharedNGraph,
@@ -77,7 +87,7 @@ NSTNode* NSTNode::HOpen(NGraph* graph)
 	NGraph* cg = graph;
 	NSTNode* first = new NSTNode(ce, cg);
 	NSTNode* cn = first;
-	layer.push_back(cn);
+	layer.push(cn);
 
 	graphs.push_back(cg);
 	nodes.push_back(cn);
@@ -90,7 +100,7 @@ NSTNode* NSTNode::HOpen(NGraph* graph)
 		ce = *it;
 		cn->pr = new NSTNode(ce, cg); // new NSTnode
 		cn = cn->pr;
-		layer.push_back(cn);
+		layer.push(cn);
 
 		// save graph & node in list, for release memory
 		graphs.push_back(cg);
@@ -101,33 +111,33 @@ NSTNode* NSTNode::HOpen(NGraph* graph)
 	return first;
 }
 
-void NSTNode::VShort(NSTNode* node)
+void NSTree::VShort(NSTNode* node)
+{
+	/*
+	 * if node.graph short node.edge => 1
+	 * 		node->pl = 1
+	 * 	else
+	 * 		node->pl = HOpen(node.graph)
+	 */
+	NGraph* cg = new NGraph(*(node->graph));
+	if (cg->Short(node->eindex))
 	{
-		/*
-		 * if node.graph short node.edge => 1
-		 * 		node->pl = 1
-		 * 	else
-		 * 		node->pl = HOpen(node.graph)
-		 */
-		NGraph* cg = new NGraph(*node.graph);
-		if(cg->Short(node.eindex))
-		{
-			node->pl = pOneNSTNode;
-			delete cg;
-		}
-		else
-		{
-			node->pl = HOpen(cg);
-		}
+		node->pl = pOneNSTNode;
+		delete cg;
 	}
+	else
+	{
+		node->pl = HOpen(cg);
+	}
+}
 
-void NSTNode::BFSBuild()
+void NSTree::BFSBuild()
+{
+	root = HOpen(origin);
+	while (!layer.empty())
 	{
-		root = HOpen(origin);
-		while(!queue.empty())
-		{
-			node = queue.front();
-			VShort(node);
-			queue.pop();
-		}
+		NSTNode* node = layer.front();
+		VShort( node);
+		layer.pop();
 	}
+}

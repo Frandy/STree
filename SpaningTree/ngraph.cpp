@@ -6,18 +6,19 @@
  */
 
 #include <algorithm>
-using std::find;
+using std::find_if;
 using std::swap;
+#include <cassert>
 
 #include "ngraph.h"
 
 
 void NGVertex::Degree()
 {
-	degree = edgeIndexs.size();
+	degree = edges.size();
 }
 
-NGraph::Graph(NGraph& g)
+NGraph::NGraph(NGraph& g)
 {
 	vertexs = g.vertexs;
 	edges = g.edges;
@@ -26,10 +27,10 @@ NGraph::Graph(NGraph& g)
 void NGraph::FindTwoV(int eindex, es_it& it, int& vp, int& vn)
 {
 	// edge not find will not happen
-	it = find(edges.begin(), edges.end(), eindex);
+	it = find_if(edges.begin(), edges.end(), [=](Edge& v)->bool{return v.index==eindex;});
 	assert(it != edges.end());
-	int vp = it->vp;
-	int vn = it->vn;
+	vp = it->vp;
+	vn = it->vn;
 	if (vp > vn)
 		swap(vp, vn);
 }
@@ -117,7 +118,7 @@ bool NGraph::Short(int eindex)
 	MergeEiList(vp_it->edges, vn_it->edges, nedges);
 	vn_it->edges.swap(nedges);
 	vn_it->Degree();
-	vertexs->erase(vp_it);
+	vertexs.erase(vp_it);
 
 	// if remain only one vertex, then OK.
 	if (vertexs.size() == 1)
@@ -129,7 +130,7 @@ bool NGraph::Short(int eindex)
 	return false;
 }
 
-void NGraph::Open(int eindex)
+bool NGraph::Open(int eindex)
 {
 	/*
 	 * open,
@@ -149,11 +150,12 @@ void NGraph::Open(int eindex)
 	vp_it->edges.remove(eindex);
 	vp_it->Degree();
 	// if isolated vertex, terminate
-	if (vp_it.degree == 0)
+	if (vp_it->degree == 0)
 		return true;
 
 	vn_it->edges.remove(eindex);
 	vn_it->Degree();
 	if (vn_it->degree == 0)
 		return true;
+	return false;
 }
