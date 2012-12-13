@@ -12,6 +12,8 @@
 using std::list;
 #include <queue>
 using std::queue;
+#include <stack>
+using std::stack;
 
 #include "ngraph.h"
 class NGraph;
@@ -58,6 +60,12 @@ public:
 	void Reduce();
 	void ZSupress();
 
+	// print
+	void PrintAllPath();
+	void PrintTerm(list<NSTNode*>& paths);
+	void CollectTermR(NSTNode* cn,list<NSTNode*>& paths);
+
+	void InitZeroOne();
 	// release memory of graph & node
 	void ReleaseAllGraph();
 	void ReleaseAllNode();

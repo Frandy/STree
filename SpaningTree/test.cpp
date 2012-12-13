@@ -32,9 +32,13 @@ int main()
 	}
 	graph->Print();
 
-	NSTree* a = new NSTree(graph);
-	a->BFSBuild();
+	NSTree* stree = new NSTree(graph);
+	stree->BFSBuild();
 
+	stree->PrintAllPath();
+
+	delete stree;
+	delete graph;
 	return 0;
 }
 
@@ -67,7 +71,7 @@ bool CreateNGraph(string name, NGraph* graph)
 		vn = nit.first->second;
 		graph->edges.push_back(Edge(ei, vp, vn));
 
-		cout << ename << " -> " << vp << "," << vn << endl;
+		cout << ename << " -> " << ei << ":" << vp << "," << vn << endl;
 
 		auto pe_it = vEdges.find(vp);
 		if (pe_it == vEdges.end())

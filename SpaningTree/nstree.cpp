@@ -5,6 +5,11 @@
  *      Author: chjd
  */
 
+#include <iostream>
+using std::cout;
+using std::endl;
+using std::cin;
+
 #include "ngraph.h"
 #include "nstree.h"
 
@@ -16,12 +21,59 @@ NSTNode::NSTNode(int e, NGraph* g) :
 NSTree::NSTree(NGraph* g) :
 	origin(g), root(nullptr)
 {
+	InitZeroOne();
 }
 
 NSTree::~NSTree()
 {
-	ReleaseAllGraph();
-	ReleaseAllNode();
+	//ReleaseAllGraph();
+	//ReleaseAllNode();
+}
+
+void NSTree::InitZeroOne()
+{
+	pZeroNSTNode = new NSTNode(0,nullptr);
+	pOneNSTNode = new NSTNode(1,nullptr);
+}
+
+void NSTree::PrintAllPath()
+{
+	list<NSTNode*> paths;
+	cout << "--- all paths begin..." << endl;
+	CollectTermR(root,paths);
+	cout << "- all paths done." << endl;
+}
+
+void NSTree::PrintTerm(list<NSTNode*>& paths)
+{
+	for (auto it = paths.begin(), et = paths.end(); it != et; it++)
+	{
+		cout << (*it)->eindex << "\t";
+	}
+	cout << endl;
+}
+
+void NSTree::CollectTermR(NSTNode* cn,list<NSTNode*>& paths)
+{
+	if (cn->eindex == 1)
+	{
+		//cout << "--- cn = 1" << endl;
+		PrintTerm(paths);
+	}
+	else if(cn->eindex==0)
+	{
+		//cout << "... cn = 0" << endl;
+		return;
+	}
+	else
+	{
+		//cout << "push in cn:" << cn->eindex << endl;
+		paths.push_back(cn);
+		CollectTermR(cn->pl, paths);
+		//cout << "pop cn:" << paths.back()->eindex << endl;
+		paths.pop_back();
+		CollectTermR(cn->pr, paths);
+	}
 }
 
 void NSTree::ReleaseAllGraph()
@@ -133,6 +185,7 @@ void NSTree::VShort(NSTNode* node)
 
 void NSTree::BFSBuild()
 {
+	cout << "---BFS build begin..." << endl;
 	root = HOpen(origin);
 	while (!layer.empty())
 	{
@@ -140,4 +193,5 @@ void NSTree::BFSBuild()
 		VShort( node);
 		layer.pop();
 	}
+	cout << "-BFS build done." << endl;
 }
