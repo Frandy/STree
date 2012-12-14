@@ -125,7 +125,7 @@ void ESTree::BFSBuild()
 		// open eindex to get pr
 		EGraph* gr = new EGraph(*(cn->graph));
 		int okr = gr->Open(cn->eindex);
-		if(ok==0)
+		if(okr==0)
 			cn->pr = pZeroESTNode;
 		else
 		{

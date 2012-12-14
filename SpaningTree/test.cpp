@@ -17,12 +17,16 @@ using std::endl;
 using std::unordered_map;
 
 #include "nstree.h"
+#include "estree.h"
 
 bool CreateNGraph(string name, NGraph* graph);
+bool CreateEGraph(NGraph* ng,EGraph* eg);
 
 int main()
 {
 	string name = "tg.txt";
+
+	/* test nstree */
 	NGraph* graph = new NGraph;
 	bool ok = CreateNGraph(name,graph);
 	if(!ok)
@@ -37,8 +41,24 @@ int main()
 
 	stree->PrintAllPath();
 
+	/* test estree */
+	EGraph* eg = new EGraph;
+	ok = CreateEGraph(graph,eg);
+	if(!ok)
+	{
+		cout << "failed to create egraph" << endl;
+		return -1;
+	}
+	ESTree* est = new ESTree(eg);
+	est->BFSBuild();
+	est->PrintAllPath();
+
 	delete stree;
 	delete graph;
+
+	delete est;
+	delete eg;
+
 	return 0;
 }
 
@@ -103,5 +123,13 @@ bool CreateNGraph(string name, NGraph* graph)
 		graph->vertexs.push_back(NGVertex(i,vEdges[i]));
 	}
 
+	return true;
+}
+
+bool CreateEGraph(NGraph* ng,EGraph* eg)
+{
+	eg->edges = ng->edges;
+	eg->nodenum = ng->vertexs.size();
+	eg->edgenum = eg->edges.size();
 	return true;
 }

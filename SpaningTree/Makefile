@@ -13,6 +13,8 @@ INCLUDE = -I .
 		  
 SOURCES = 	ngraph.cpp \
 			nstree.cpp \
+			egraph.cpp \
+			estree.cpp \
 			test.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)

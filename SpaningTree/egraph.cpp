@@ -8,12 +8,14 @@
 #include <algorithm>
 using std::find_if;
 using std::swap;
+using std::min;
 #include <cassert>
 
 #include <iostream>
 using std::cout;
 using std::endl;
 
+#include <string>
 
 #include "egraph.h"
 
@@ -46,11 +48,11 @@ size_t EGraph::Hash() const
 	int seed_a = nodenum * 7 + edgenum;
 	int prime = 37;
 	int seed_b = 0, seed_c = 0, seed_d = 0;
-	for (auto it = edgeArray.begin(), et = edgeArray.end(); it != et; it++)
+	for (auto it = edges.begin(), et = edges.end(); it != et; it++)
 	{
-		seed_b ^= it->Index() * (seed_c % prime);
-		seed_c |= it->NodeP() * (seed_d % prime);
-		seed_d &= it->NodeN() * (seed_b % prime);
+		seed_b ^= it->index * (seed_c % prime);
+		seed_c |= it->vp * (seed_d % prime);
+		seed_d &= it->vn * (seed_b % prime);
 	}
 	size_t seed = (seed_d << 24) & (0xFF000000);
 	seed = seed | ((seed_c << 16) & (0x00FF0000));
@@ -65,18 +67,18 @@ size_t EGraph::Hash() const
 // char, 256
 size_t EGraph::HashByString() const
 {
-	u16string seed_t(min(edgenum + 1, 16), char(0));
+	std::string seed_t(min(edgenum + 1, 16), char(0));
 	seed_t[0] = char(nodenum + edgenum * 7);
 	int i = 1;
-	for (auto it = edgeArray.begin(), et = edgeArray.end(); it != et; it++)
+	for (auto it = edges.begin(), et = edges.end(); it != et; it++)
 	{
-		int t = it->Index() * 11 + it->NodeP() * 5 + it->NodeN();
+		int t = it->index * 11 + it->vp * 5 + it->vn;
 		seed_t[i++] = char(t);
 		if (i > 16)
 			break;
 	}
 	std::hash<std::string> hash_fn;
-	return hash_fn(str);
+	return hash_fn(seed_t);
 }
 
 int EGraph::Short(int eindex)

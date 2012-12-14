@@ -25,6 +25,7 @@ public:
 	int nodenum;
 	int edgenum;
 
+	typedef list<Edge>::iterator es_it;
 private:
 	void FindTwoV(int eindex,es_it& it,int& vp,int& vn);
 	void ShortAllEdge(int vp,int vn);
