@@ -52,6 +52,8 @@ int main()
 	ESTree* est = new ESTree(eg);
 	est->BFSBuild();
 	est->PrintAllPath();
+	est->ZSuppress();
+	est->PrintAllPath();
 
 	delete stree;
 	delete graph;

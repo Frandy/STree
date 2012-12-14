@@ -39,6 +39,8 @@ public:
 	// char, 256
 	size_t HashByString() const;
 
+	void Print();
+
 	int Short(int eindex);
 	int Open(int eindex);
 };

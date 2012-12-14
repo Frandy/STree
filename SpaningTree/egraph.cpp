@@ -81,6 +81,16 @@ size_t EGraph::HashByString() const
 	return hash_fn(seed_t);
 }
 
+void EGraph::Print()
+{
+	cout << "Edges:" << edges.size() << endl;
+	for(auto it=edges.begin(),et=edges.end();it!=et;it++)
+	{
+		cout << (*it) << "\t";
+	}
+	cout << endl;
+}
+
 int EGraph::Short(int eindex)
 {
 	es_it e_it;

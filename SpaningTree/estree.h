@@ -27,6 +27,7 @@ public:
 	ESTNode* pl;
 	ESTNode* pr;
 
+	bool visit;
 	bool mark;
 
 public:
@@ -54,13 +55,18 @@ public:
 	// build
 	void BFSBuild();
 
+	void ZSuppress();
+
 	void Reduce();
-	void ZSupress();
 
 	// print
 	void PrintAllPath();
+
+private:
 	void PrintTerm(list<ESTNode*>& paths);
 	void CollectTermR(ESTNode* cn, list<ESTNode*>& paths);
+
+	void ZSuppressNodeR(ESTNode* cn,bool visit);
 
 	void InitZeroOne();
 	// release memory of graph & node
