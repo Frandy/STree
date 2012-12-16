@@ -72,7 +72,7 @@ void ESTree::CollectTermR(ESTNode* cn, list<ESTNode*>& paths)
 		//cout << "push in cn:" << cn->eindex << endl;
 		paths.push_back(cn);
 		CollectTermR(cn->pl, paths);
-		//cout << "pop cn:" << paths.back()->eindex << endl;
+	//	cout << "pop cn:" << paths.back()->eindex << endl;
 		paths.pop_back();
 		CollectTermR(cn->pr, paths);
 	}
@@ -103,7 +103,7 @@ void ESTree::BFSBuild()
 	cout << "---BFS build begin..." << endl;
 
 	root = new ESTNode(origin->edges.front().index, origin);
-	layer.push(root);
+	layer.push_back(root);
 	while (!layer.empty())
 	{
 		ESTNode* cn = layer.front();
@@ -118,7 +118,7 @@ void ESTree::BFSBuild()
 		else
 		{
 			cn->pl = new ESTNode(cn->eindex + 1, gl);
-			layer.push(cn->pl);
+			layer.push_back(cn->pl);
 		}
 
 		// open eindex to get pr
@@ -129,17 +129,61 @@ void ESTree::BFSBuild()
 		else
 		{
 			cn->pr = new ESTNode(cn->eindex + 1, gr);
-			layer.push(cn->pr);
+			layer.push_back(cn->pr);
 		}
-		/*
+/*
 		 cout << "-- node: " << cn->eindex << endl;
 		 cn->graph->Print();
 		 cout << "\tpl:" << cn->pl->eindex << "\t pr:" << cn->pr->eindex << endl;
-		 */
-		layer.pop();
+*/
+		layer.pop_front();
 	}
 	cout << "-BFS build done." << endl;
 }
+
+void ESTree::DFSBuild()
+{
+	// use layer as stack
+	cout << "---DFS build begin..." << endl;
+	root = new ESTNode(origin->edges.front().index, origin);
+	layer.push_back(root);
+	while (!layer.empty())
+	{
+		ESTNode* cn = layer.back();
+		layer.pop_back();
+		// short eindex to get pl
+		EGraph* gl = new EGraph(*(cn->graph));
+		int okl = gl->Short(cn->eindex);
+		if (okl == 1)
+			cn->pl = pOneESTNode;
+		else if (okl == 0)
+			cn->pl = pZeroESTNode;
+		else
+		{
+			cn->pl = new ESTNode(cn->eindex + 1, gl);
+		}
+
+		// open eindex to get pr
+		EGraph* gr = new EGraph(*(cn->graph));
+		int okr = gr->Open(cn->eindex);
+		if (okr == 0)
+			cn->pr = pZeroESTNode;
+		else
+		{
+			cn->pr = new ESTNode(cn->eindex + 1, gr);
+		}
+		if(okr!=0)
+			layer.push_back(cn->pr);
+		if(okl!=1 && okl!=0)
+			layer.push_back(cn->pl);
+/*
+		 cout << "-- node: " << cn->eindex << endl;
+		 cn->graph->Print();
+		 cout << "\tpl:" << cn->pl->eindex << "\t pr:" << cn->pr->eindex << endl;
+*/
+	}
+}
+
 
 /*
  * zero suppress

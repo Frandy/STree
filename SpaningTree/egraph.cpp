@@ -98,8 +98,10 @@ int EGraph::Short(int eindex)
 	FindTwoV(eindex, e_it, vp, vn);
 	// no target edge found
 	if (e_it == edges.end())
+	{
+//		cout << "not found:" << eindex << endl;
 		return 0;
-
+	}
 	nodenum -= 1;
 	// short large to small
 	ShortAllEdge(vn, vp);
@@ -110,7 +112,10 @@ int EGraph::Short(int eindex)
 		return 1;
 	// confirm it not connect after short, which should be confirmed after open
 	else if (edgenum < nodenum - 1)
+	{
+//		cout << "not connect" << endl;
 		return 0;
+	}
 	else
 		return 2;
 }
@@ -121,14 +126,20 @@ int EGraph::Open(int eindex)
 	FindTwoV(eindex, e_it, vp, vn);
 	// no target edge found
 	if (e_it == edges.end())
-		return 0;
+	{
+//		cout << "not found:" << eindex << endl;
+		return 2;
+	}
 
 	edges.erase(e_it);
 	edgenum = edges.size();
 
 	// confirm not connect after open
 	if (edgenum < nodenum - 1)
+	{
+//		cout << "not connect" << endl;
 		return 0;
+	}
 	else
 		return 2;
 }

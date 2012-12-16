@@ -22,9 +22,18 @@ using std::unordered_map;
 bool CreateNGraph(string name, NGraph* graph);
 bool CreateEGraph(NGraph* ng,EGraph* eg);
 
-int main()
+int main(int argc,char** argv)
 {
 	string name = "tg.txt";
+	if(argc==2)
+	{
+		name = argv[1];
+	}
+	else
+	{
+		cout << "usage: stree tg.txt" << endl;
+		return -1;
+	}
 
 	/* test nstree */
 	NGraph* graph = new NGraph;
@@ -50,8 +59,10 @@ int main()
 		return -1;
 	}
 	ESTree* est = new ESTree(eg);
-	est->BFSBuild();
-	est->PrintAllPath();
+//	est->BFSBuild();
+	est->DFSBuild();
+
+	//est->PrintAllPath();
 	est->ZSuppress();
 	est->PrintAllPath();
 

@@ -67,7 +67,7 @@ void NGraph::MergeEiList(list<int>& vp, list<int>& vn, list<int>& nedges)
 			nedges.push_back(*e_vp_it);
 			e_vp_it++;
 		}
-		else if ((*e_vp_it) < (*e_vn_it))
+		else if ((*e_vp_it) > (*e_vn_it))
 		{
 			nedges.push_back(*e_vn_it);
 			e_vn_it++;
@@ -138,6 +138,7 @@ bool NGraph::Short(int eindex)
 	list<int> nedges;
 	MergeEiList(vp_it->edges, vn_it->edges, nedges);
 	vn_it->edges.swap(nedges);
+//	vn_it->edges = nedges;
 	vn_it->Degree();
 	vertexs.erase(vp_it);
 

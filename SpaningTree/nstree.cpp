@@ -143,20 +143,38 @@ NSTNode* NSTree::HOpen(NGraph* graph)
 
 	graphs.push_back(cg);
 	nodes.push_back(cn);
+/*
+	cout << "create node:" << endl;
+	cout << cn->eindex << endl;
+	cn->graph->Print();
+*/
 
 	it++;
-	for (auto et = minv->edges.end(); it != et; it++)
+	//for (auto et = minv->edges.end(); it != et; it++)
+	int ecnt = 1;
+	int etotal = minv->edges.size();
+	while(ecnt<etotal)
 	{
+//		cout << ecnt << "\t" << etotal-1 << endl;
+//		cout << "in while " << ecnt << endl;
 		cg = new NGraph(*cg); // new NGraph
+//		cout << "to open edge:" << ce << endl;
 		cg->Open(ce);
 		ce = *it;
 		cn->pr = new NSTNode(ce, cg); // new NSTnode
 		cn = cn->pr;
 		layer.push(cn);
 
+		it++;
+		ecnt++;
 		// save graph & node in list, for release memory
 		graphs.push_back(cg);
 		nodes.push_back(cn);
+/*
+		cout << "create node:" << endl;
+		cout << cn->eindex << endl;
+		cn->graph->Print();
+*/
 	}
 	cn->pr = pZeroNSTNode;
 
@@ -172,6 +190,7 @@ void NSTree::VShort(NSTNode* node)
 	 * 		node->pl = HOpen(node.graph)
 	 */
 	NGraph* cg = new NGraph(*(node->graph));
+//	cout << "to short edge:" << node->eindex << endl;
 	if (cg->Short(node->eindex))
 	{
 		node->pl = pOneNSTNode;

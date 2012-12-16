@@ -45,7 +45,7 @@ public:
 private:
 	ESTNode* pZeroESTNode; // leaf node, zero & one
 	ESTNode* pOneESTNode;
-	queue<ESTNode*> layer; // working layer
+	list<ESTNode*> layer; // working layer
 
 public:
 	// construct
@@ -54,6 +54,8 @@ public:
 	~ESTree();
 	// build
 	void BFSBuild();
+
+	void DFSBuild();
 
 	void ZSuppress();
 
