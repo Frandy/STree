@@ -137,18 +137,37 @@ NSTNode* NSTree::HOpen(NGraph* graph)
 	 *	return the first node, to be the left
 	 *
 	 */
+	// find graph in sharedGraphNodeMap
+	NSTNode* first;
+	auto f_it = sharedGraphNodeMap.find(graph);
+	if(f_it!=sharedGraphNodeMap.end())
+	{
+		first = f_it->second;
+		return first;
+	}
+	//
+
 	NGraph::ngv_it minv;
 	FindMinDegV(graph, minv);
 	auto it = minv->edges.begin();
 
 	int ce = *it;
 	NGraph* cg = graph;
-	NSTNode* first = new NSTNode(ce, cg);
+	first = new NSTNode(ce, cg);
 	NSTNode* cn = first;
-	layer.push(cn);
 
-//	graphs.push_back(cg);
-	nodes.push_back(cn);
+	auto cn_it = sharedNodeMap.insert(make_pair(cn,cn));
+	if(!cn_it.second)
+	{
+		cout << "share happened here" << endl;
+		cn = cn_it.first->second;
+		first = cn;
+	}
+	else
+	{
+		layer.push(cn);
+		nodes.push_back(cn);
+	}
 /*
 	cout << "create node:" << endl;
 	cout << cn->eindex << endl;
@@ -162,13 +181,33 @@ NSTNode* NSTree::HOpen(NGraph* graph)
 	{
 		cg = new NGraph(*cg); // new NGraph
 		cg->Open(ce);
+
+		// add graph to sharedGraphMap
+		auto git = sharedGraphMap.insert(make_pair(cg,cg));
+		if(!git.second)
+		{
+			delete cg;
+			cg = git.first->second;
+		}
+
 		ce = *it;
 		cn->pr = new NSTNode(ce, cg); // new NSTnode
-		cn = cn->pr;
-		layer.push(cn);
 
+		// add node to sharedNodeMap
+		auto nit = sharedNodeMap.insert(make_pair(cn->pr,cn->pr));
+		if(!nit.second)
+		{
+			delete (cn->pr);
+			cn->pr = nit.first->second;
+		}
+		else
+		{
+			layer.push(cn->pr);
+			nodes.push_back(cn->pr);
+		}
+
+		cn = cn->pr;
 		it++;
-		nodes.push_back(cn);
 /*
 		cout << "create node:" << endl;
 		cout << cn->eindex << endl;
@@ -177,6 +216,8 @@ NSTNode* NSTree::HOpen(NGraph* graph)
 	}
 	cn->pr = pZeroNSTNode;
 
+	// add first to sharedGraphNodeMap, paired with original graph or the shorted graph
+	sharedGraphNodeMap.insert(make_pair(graph,first));
 	return first;
 }
 
