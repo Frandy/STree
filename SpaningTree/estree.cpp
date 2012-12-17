@@ -86,12 +86,15 @@ void ESTree::CollectTermR(ESTNode* cn, list<ESTNode*>& paths)
 
 void ESTree::ReleaseAllGraph()
 {
-	for (auto it = graphs.begin(), et = graphs.end(); it != et; it++)
+	for (auto it = sharedGraphMap.begin(), et = sharedGraphMap.end(); it != et; it++)
 	{
-		delete (*it);
-		(*it) = nullptr;
+	//	if (it->first == it->second)
+		{
+			delete (it->second);
+			(it->second) = nullptr;
+		}
 	}
-	graphs.clear();
+	sharedGraphMap.clear();
 }
 
 void ESTree::ReleaseAllNode()
@@ -104,6 +107,30 @@ void ESTree::ReleaseAllNode()
 	nodes.clear();
 }
 
+void ESTree::AddNewNode(int eindex,ESTNode*& node,EGraph*& gl,int& cnt)
+{
+	auto git = sharedGraphMap.insert(make_pair(gl,gl));
+	if(!git.second)
+	{
+		delete gl;
+		gl = git.first->second;
+	}
+
+	node = new ESTNode(eindex + 1, gl);
+	auto nit = sharedNodeMap.insert(make_pair(node,node));
+	if(nit.second)
+	{
+		layer.push_back(node);
+		nodes.push_back(node);
+	}
+	else
+	{
+		delete (node);
+		cnt++;
+		node = nit.first->second;
+	}
+}
+
 void ESTree::BFSBuild()
 {
 	cout << "---BFS build begin..." << endl;
@@ -111,6 +138,7 @@ void ESTree::BFSBuild()
 	root = new ESTNode(origin->edges.front().index, origin);
 	layer.push_back(root);
 	nodes.push_back(root);
+	int cnt=0;	// cnt share node during construct
 	while (!layer.empty())
 	{
 		ESTNode* cn = layer.front();
@@ -124,9 +152,7 @@ void ESTree::BFSBuild()
 			cn->pl = pZeroESTNode;
 		else
 		{
-			cn->pl = new ESTNode(cn->eindex + 1, gl);
-			layer.push_back(cn->pl);
-			nodes.push_back(cn->pl);
+			AddNewNode(cn->eindex,cn->pl,gl,cnt);
 		}
 
 		// open eindex to get pr
@@ -136,9 +162,7 @@ void ESTree::BFSBuild()
 			cn->pr = pZeroESTNode;
 		else
 		{
-			cn->pr = new ESTNode(cn->eindex + 1, gr);
-			layer.push_back(cn->pr);
-			nodes.push_back(cn->pr);
+			AddNewNode(cn->eindex,cn->pr,gr,cnt);
 		}
 /*
 		 cout << "-- node: " << cn->eindex << endl;
@@ -147,8 +171,10 @@ void ESTree::BFSBuild()
 */
 		layer.pop_front();
 	}
+	ReleaseAllGraph();
 	sharedNodeMap.clear();
 	cout << "-BFS build done." << endl;
+	cout << "shared node count: " << cnt << endl;
 }
 
 void ESTree::DFSBuild()

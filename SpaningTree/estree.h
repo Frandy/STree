@@ -132,6 +132,8 @@ private:
 	void PrintTerm(list<ESTNode*>& paths);
 	void CollectTermR(ESTNode* cn, list<ESTNode*>& paths);
 
+	void AddNewNode(int eindex,ESTNode*& node,EGraph*& gl,int& cnt);
+
 	void BFSBuild();
 	void DFSBuild();
 	void ZSuppress();
