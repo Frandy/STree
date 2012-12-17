@@ -143,3 +143,15 @@ int EGraph::Open(int eindex)
 	else
 		return 2;
 }
+
+bool operator == (const EGraph& a,const EGraph& b)
+{
+	if(a.nodenum!=b.nodenum || a.edgenum!=b.edgenum)
+		return false;
+	for(auto a_it=a.edges.begin(),a_et=a.edges.end(),b_it=b.edges.begin();a_it!=a_et;a_it++,b_it++)
+	{
+		if((*a_it)!=(*b_it))
+			return false;
+	}
+	return true;
+}

@@ -9,6 +9,8 @@
 using std::cout;
 using std::endl;
 using std::cin;
+#include <utility>
+using std::make_pair;
 
 #include "egraph.h"
 #include "estree.h"
@@ -34,6 +36,10 @@ void ESTree::InitZeroOne()
 {
 	pZeroESTNode = new ESTNode(0, nullptr);
 	pOneESTNode = new ESTNode(1, nullptr);
+	pZeroESTNode->pl = pOneESTNode;
+	pZeroESTNode->pr = pZeroESTNode;
+	pOneESTNode->pl = pOneESTNode;
+	pOneESTNode->pr = pZeroESTNode;
 	nodes.push_back(pZeroESTNode);
 	nodes.push_back(pOneESTNode);
 }
@@ -104,6 +110,7 @@ void ESTree::BFSBuild()
 
 	root = new ESTNode(origin->edges.front().index, origin);
 	layer.push_back(root);
+	nodes.push_back(root);
 	while (!layer.empty())
 	{
 		ESTNode* cn = layer.front();
@@ -119,6 +126,7 @@ void ESTree::BFSBuild()
 		{
 			cn->pl = new ESTNode(cn->eindex + 1, gl);
 			layer.push_back(cn->pl);
+			nodes.push_back(cn->pl);
 		}
 
 		// open eindex to get pr
@@ -130,6 +138,7 @@ void ESTree::BFSBuild()
 		{
 			cn->pr = new ESTNode(cn->eindex + 1, gr);
 			layer.push_back(cn->pr);
+			nodes.push_back(cn->pr);
 		}
 /*
 		 cout << "-- node: " << cn->eindex << endl;
@@ -138,6 +147,7 @@ void ESTree::BFSBuild()
 */
 		layer.pop_front();
 	}
+	sharedNodeMap.clear();
 	cout << "-BFS build done." << endl;
 }
 
@@ -147,6 +157,7 @@ void ESTree::DFSBuild()
 	cout << "---DFS build begin..." << endl;
 	root = new ESTNode(origin->edges.front().index, origin);
 	layer.push_back(root);
+	nodes.push_back(root);
 	while (!layer.empty())
 	{
 		ESTNode* cn = layer.back();
@@ -161,6 +172,7 @@ void ESTree::DFSBuild()
 		else
 		{
 			cn->pl = new ESTNode(cn->eindex + 1, gl);
+			nodes.push_back(cn->pl);
 		}
 
 		// open eindex to get pr
@@ -171,6 +183,7 @@ void ESTree::DFSBuild()
 		else
 		{
 			cn->pr = new ESTNode(cn->eindex + 1, gr);
+			nodes.push_back(cn->pr);
 		}
 		if(okr!=0)
 			layer.push_back(cn->pr);
@@ -182,6 +195,26 @@ void ESTree::DFSBuild()
 		 cout << "\tpl:" << cn->pl->eindex << "\t pr:" << cn->pr->eindex << endl;
 */
 	}
+	sharedNodeMap.clear();
+	cout << "---DFS build done..." << endl;
+
+}
+
+
+int ESTree::ReleaseNodeGC()
+{
+	int cnt = 0;
+	for (auto it = nodes.begin(), et = nodes.end(); it != et; it++)
+	{
+		if ((*it)->mark)
+		{
+			delete (*it);
+			nodes.erase(it);
+			it--;
+			cnt++;
+		}
+	}
+	return cnt;
 }
 
 
@@ -211,6 +244,7 @@ void ESTree::ZSuppressNodeR(ESTNode* cn, bool visit)
 	node = cn->pr;
 	if (node->mark)
 		cn->pr = node->pr;
+	return;
 }
 
 void ESTree::ZSuppress()
@@ -220,5 +254,63 @@ void ESTree::ZSuppress()
 	pZeroESTNode->visit = visit;
 	pOneESTNode->visit = visit;
 	ZSuppressNodeR(root, visit);
+	int cnt = ReleaseNodeGC();
 	cout << "- zero suppress done." << endl;
+	cout << "zero suppressed node count: " << cnt << endl;
+
+}
+
+void ESTree::ReduceNodeR(ESTNode* cn,bool visit,int& tripleCnt)
+{
+	if(cn->visit==visit)
+		return;
+	if(cn->pl->visit!=visit)
+		ReduceNodeR(cn->pl,visit,tripleCnt);
+	if(cn->pr->visit!=visit)
+		ReduceNodeR(cn->pr,visit,tripleCnt);
+
+	if(cn->pl->mark)
+		cn->pl = cn->pl->pshare;
+	if(cn->pr->mark)
+		cn->pr = cn->pr->pshare;
+
+	auto it = sharedTripleMap.insert(make_pair(cn,cn));
+	if(it.second)
+	{
+		cn->tid = tripleCnt++;
+	}
+	else
+	{
+		cn->mark = true;
+		cn->pshare = it.first->second;
+	}
+
+	cn->visit = visit;
+	return;
+}
+
+void ESTree::Reduce()
+{
+	cout << "-- reduce begin..." << endl;
+	bool visit = !(root->visit);
+	pZeroESTNode->visit = visit;
+	pOneESTNode->visit = visit;
+	int tripleCnt = 0;
+	pZeroESTNode->tid = tripleCnt++;
+	pOneESTNode->tid = tripleCnt++;
+	ReduceNodeR(root,visit,tripleCnt);
+	sharedTripleMap.clear();
+	int cnt = ReleaseNodeGC();
+	cout << "- reduce done." << endl;
+	cout << "reduce node count: " << cnt << endl;
+}
+
+void ESTree::Build()
+{
+	BFSBuild();
+	cout << "total node count: " << nodes.size() << endl;
+	ZSuppress();
+	cout << "total node count: " << nodes.size() << endl;
+	Reduce();
+	cout << "total node count: " << nodes.size() << endl;
 }

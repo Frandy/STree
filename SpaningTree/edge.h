@@ -18,9 +18,16 @@ public:
 	int vp;
 	int vn;
 public:
-	Edge(int p,int n):vp(p),vn(n){}
-	Edge(int e,int p,int n):index(e),vp(p),vn(n){}
-	Edge(const Edge& et){
+	Edge(int p, int n) :
+		vp(p), vn(n)
+	{
+	}
+	Edge(int e, int p, int n) :
+		index(e), vp(p), vn(n)
+	{
+	}
+	Edge(const Edge& et)
+	{
 		index = et.index;
 		vp = et.vp;
 		vn = et.vn;
@@ -29,28 +36,37 @@ public:
 	{
 		index = k++;
 	}
-	bool Short(int p,int n)
+	bool Short(int p, int n)
 	{
-		if(vp==p)
+		if (vp == p)
 			vp = n;
-		if(vn==p)
+		if (vn == p)
 			vn = n;
-		return vp==vn;
+		return vp == vn;
 	}
-	bool ShortReIndex(int p,int n)
+	bool ShortReIndex(int p, int n)
 	{
-		if(vp==p)
+		if (vp == p)
 			vp = n;
-		else if(vp>p)
+		else if (vp > p)
 			vp -= 1;
-		if(vn==p)
+		if (vn == p)
 			vn = n;
-		else if(vn>p)
+		else if (vn > p)
 			vn -= 1;
-		return vp==vn;
+		return vp == vn;
 	}
 
-	friend ostream& operator << (ostream& out,const Edge& et)
+	friend bool operator ==(const Edge& a, const Edge& b)
+	{
+		return a.index == b.index && a.vp == b.vp && a.vn == b.vn;
+	}
+	friend bool operator !=(const Edge& a, const Edge& b)
+	{
+		return a.index != b.index || a.vp != b.vp || a.vn != b.vn;
+	}
+
+	friend ostream& operator <<(ostream& out, const Edge& et)
 	{
 		out << et.index << ":" << et.vp << "," << et.vn << " ";
 		return out;

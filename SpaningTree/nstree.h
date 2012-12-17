@@ -46,7 +46,7 @@ private:
 	NSTNode* pOneNSTNode;
 	queue<NSTNode*> layer;							// working layer
 
-//	unordered_map<NGraph*,NSTNode*> sharedNGraph;
+//	unordered_map<NGraph*,NSTNode*> sharedNGraphMap;
 //	unordered_map<NSTNode*,NSTNode*> sharedNodeMap;
 
 public:

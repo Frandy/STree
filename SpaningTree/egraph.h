@@ -38,11 +38,31 @@ public:
 	// char16_t, 65536
 	// char, 256
 	size_t HashByString() const;
+	friend bool operator == (const EGraph& a,const EGraph& b);
+
 
 	void Print();
 
 	int Short(int eindex);
 	int Open(int eindex);
+};
+
+class EGHash
+{
+public:
+	size_t operator () (const EGraph* g) const
+	{
+		return g->Hash();
+	}
+};
+
+class EGEqual
+{
+public:
+	bool operator () (const EGraph* a,const EGraph* b) const
+	{
+		return (a==b) || (*a)==(*b);
+	}
 };
 
 #endif /* EGRAPH_H_ */

@@ -59,11 +59,7 @@ int main(int argc,char** argv)
 		return -1;
 	}
 	ESTree* est = new ESTree(eg);
-//	est->BFSBuild();
-	est->DFSBuild();
-
-	//est->PrintAllPath();
-	est->ZSuppress();
+	est->Build();
 	est->PrintAllPath();
 
 	delete stree;
