@@ -136,6 +136,7 @@ void ESTree::BFSBuild()
 	cout << "---BFS build begin..." << endl;
 
 	root = new ESTNode(origin->edges.front().index, origin);
+//	origin->Print();
 	layer.push_back(root);
 	nodes.push_back(root);
 	int cnt=0;	// cnt share node during construct

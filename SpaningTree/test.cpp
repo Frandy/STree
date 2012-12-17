@@ -46,13 +46,15 @@ int main(int argc,char** argv)
 	graph->Print();
 
 	NSTree* stree = new NSTree(graph);
-	stree->BFSBuild();
+	stree->Build();
+//	stree->BFSBuild();
 
 	stree->PrintAllPath();
 
 	/* test estree */
 	EGraph* eg = new EGraph;
 	ok = CreateEGraph(graph,eg);
+//	eg->Print();
 	if(!ok)
 	{
 		cout << "failed to create egraph" << endl;

@@ -35,9 +35,6 @@ public:
 	int tid;	// triple index, for reduce
 	ESTNode* pshare;	// shared triple,
 
-
-	static int totalcnt;
-
 public:
 	ESTNode()=default;
 	ESTNode(int e, EGraph* g);
@@ -106,7 +103,6 @@ public:
 	EGraph* origin; // the original graph
 	ESTNode* root; // root node
 	list<ESTNode*> nodes; // all nodes
-	list<EGraph*> graphs; // all graphs, since there are sharedGraphMap
 private:
 	ESTNode* pZeroESTNode; // leaf node, zero & one
 	ESTNode* pOneESTNode;

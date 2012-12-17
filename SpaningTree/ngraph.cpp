@@ -181,3 +181,38 @@ bool NGraph::Open(int eindex)
 		return true;
 	return false;
 }
+
+size_t NGraph::Hash() const
+{
+	// 4 8-bit
+	int nodenum = vertexs.size();
+	int edgenum = edges.size();
+	int seed_a = nodenum * 7 + edgenum;
+	int prime = 37;
+	int seed_b = 0, seed_c = 0, seed_d = 0;
+	for (auto it = edges.begin(), et = edges.end(); it != et; it++)
+	{
+		seed_b ^= it->index * (seed_c % prime);
+		seed_c |= it->vp * (seed_d % prime);
+		seed_d &= it->vn * (seed_b % prime);
+	}
+	size_t seed = (seed_d << 24) & (0xFF000000);
+	seed = seed | ((seed_c << 16) & (0x00FF0000));
+	seed = seed | ((seed_b << 8) & (0x0000FF00));
+	seed = seed | (seed_a & 0x000000FF);
+	return seed;
+}
+
+bool operator ==(const NGraph& a, const NGraph& b)
+{
+	if (a.edges.size() != b.edges.size() || a.vertexs.size()
+			!= b.vertexs.size())
+		return false;
+	for (auto a_it = a.edges.begin(), a_et = a.edges.end(), b_it =
+			b.edges.begin(); a_it != a_et; a_it++, b_it++)
+	{
+		if ((*a_it) != (*b_it))
+			return false;
+	}
+	return true;
+}

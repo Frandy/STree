@@ -57,6 +57,9 @@ public:
 
 	void Print();
 
+	size_t Hash() const;
+	friend bool operator ==(const NGraph& a, const NGraph& b);
+
 	// short & open operation for the graph
 	bool Short(int eindex);
 	bool Open(int eindex);
@@ -73,6 +76,25 @@ private:
 
 	// short the two node for all edges
 	void ShortAllEdge(int vp,int vn);
+};
+
+
+class NGHash
+{
+public:
+	size_t operator () (const NGraph* g) const
+	{
+		return g->Hash();
+	}
+};
+
+class NGEqual
+{
+public:
+	bool operator () (const NGraph* a,const NGraph* b) const
+	{
+		return (a==b) || (*a)==(*b);
+	}
 };
 
 #endif /* NGRAPH_H_ */

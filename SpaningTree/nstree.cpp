@@ -9,6 +9,8 @@
 using std::cout;
 using std::endl;
 using std::cin;
+#include <utility>
+using std::make_pair;
 
 #include "ngraph.h"
 #include "nstree.h"
@@ -34,6 +36,10 @@ void NSTree::InitZeroOne()
 {
 	pZeroNSTNode = new NSTNode(0,nullptr);
 	pOneNSTNode = new NSTNode(1,nullptr);
+	pZeroNSTNode->pl = pOneNSTNode;
+	pZeroNSTNode->pr = pZeroNSTNode;
+	pOneNSTNode->pl = pOneNSTNode;
+	pOneNSTNode->pr = pZeroNSTNode;
 }
 
 void NSTree::PrintAllPath()
@@ -78,12 +84,12 @@ void NSTree::CollectTermR(NSTNode* cn,list<NSTNode*>& paths)
 
 void NSTree::ReleaseAllGraph()
 {
-	for (auto it = graphs.begin(), et = graphs.end(); it != et; it++)
+	for (auto it = sharedGraphMap.begin(), et = sharedGraphMap.end(); it != et; it++)
 	{
-		delete (*it);
-		(*it) = nullptr;
+		delete (it->second);
+		(it->second) = nullptr;
 	}
-	graphs.clear();
+	sharedGraphMap.clear();
 }
 
 void NSTree::ReleaseAllNode()
@@ -141,7 +147,7 @@ NSTNode* NSTree::HOpen(NGraph* graph)
 	NSTNode* cn = first;
 	layer.push(cn);
 
-	graphs.push_back(cg);
+//	graphs.push_back(cg);
 	nodes.push_back(cn);
 /*
 	cout << "create node:" << endl;
@@ -151,14 +157,10 @@ NSTNode* NSTree::HOpen(NGraph* graph)
 
 	it++;
 	//for (auto et = minv->edges.end(); it != et; it++)
-	int ecnt = 1;
-	int etotal = minv->edges.size();
-	while(ecnt<etotal)
+	auto et = minv->edges.end();
+	while(it!=et)
 	{
-//		cout << ecnt << "\t" << etotal-1 << endl;
-//		cout << "in while " << ecnt << endl;
 		cg = new NGraph(*cg); // new NGraph
-//		cout << "to open edge:" << ce << endl;
 		cg->Open(ce);
 		ce = *it;
 		cn->pr = new NSTNode(ce, cg); // new NSTnode
@@ -166,9 +168,6 @@ NSTNode* NSTree::HOpen(NGraph* graph)
 		layer.push(cn);
 
 		it++;
-		ecnt++;
-		// save graph & node in list, for release memory
-		graphs.push_back(cg);
 		nodes.push_back(cn);
 /*
 		cout << "create node:" << endl;
@@ -213,4 +212,118 @@ void NSTree::BFSBuild()
 		layer.pop();
 	}
 	cout << "-BFS build done." << endl;
+}
+
+int NSTree::ReleaseNodeGC()
+{
+	int cnt = 0;
+	for (auto it = nodes.begin(), et = nodes.end(); it != et; it++)
+	{
+		if ((*it)->mark)
+		{
+			delete (*it);
+			nodes.erase(it);
+			it--;
+			cnt++;
+		}
+	}
+	return cnt;
+}
+
+
+/*
+ * zero suppress
+ */
+
+void NSTree::ZSuppressNodeR(NSTNode* cn, bool visit)
+{
+	/*if(cn->eindex==0 || cn->eindex==1)
+	 return;
+	 */
+	if (cn->visit == visit)
+		return;
+	cn->visit = visit;
+
+	ZSuppressNodeR(cn->pl, visit);
+	ZSuppressNodeR(cn->pr, visit);
+
+	NSTNode* node = cn->pl;
+	if (node->eindex == 0)
+		cn->mark = true;
+	else if (node->mark)
+		cn->pl = node->pr;
+	if (cn->pl->mark)
+		cn->mark = true;
+	node = cn->pr;
+	if (node->mark)
+		cn->pr = node->pr;
+	return;
+}
+
+void NSTree::ZSuppress()
+{
+	cout << "-- zero suppress begin..." << endl;
+	bool visit = !(root->visit);
+	pZeroNSTNode->visit = visit;
+	pOneNSTNode->visit = visit;
+	ZSuppressNodeR(root, visit);
+	int cnt = ReleaseNodeGC();
+	cout << "- zero suppress done." << endl;
+	cout << "zero suppressed node count: " << cnt << endl;
+
+}
+
+void NSTree::ReduceNodeR(NSTNode* cn,bool visit,int& tripleCnt)
+{
+	if(cn->visit==visit)
+		return;
+	if(cn->pl->visit!=visit)
+		ReduceNodeR(cn->pl,visit,tripleCnt);
+	if(cn->pr->visit!=visit)
+		ReduceNodeR(cn->pr,visit,tripleCnt);
+
+	if(cn->pl->mark)
+		cn->pl = cn->pl->pshare;
+	if(cn->pr->mark)
+		cn->pr = cn->pr->pshare;
+
+	auto it = sharedTripleMap.insert(make_pair(cn,cn));
+	if(it.second)
+	{
+		cn->tid = tripleCnt++;
+	}
+	else
+	{
+		cn->mark = true;
+		cn->pshare = it.first->second;
+	}
+
+	cn->visit = visit;
+	return;
+}
+
+void NSTree::Reduce()
+{
+	cout << "-- reduce begin..." << endl;
+	bool visit = !(root->visit);
+	pZeroNSTNode->visit = visit;
+	pOneNSTNode->visit = visit;
+	int tripleCnt = 0;
+	pZeroNSTNode->tid = tripleCnt++;
+	pOneNSTNode->tid = tripleCnt++;
+	ReduceNodeR(root,visit,tripleCnt);
+	sharedTripleMap.clear();
+	int cnt = ReleaseNodeGC();
+	cout << "- reduce done." << endl;
+	cout << "reduce node count: " << cnt << endl;
+}
+
+void NSTree::Build()
+{
+	BFSBuild();
+	cout << "total node count: " << nodes.size() << endl;
+	ZSuppress();
+	cout << "total node count: " << nodes.size() << endl;
+	Reduce();
+	cout << "total node count: " << nodes.size() << endl;
 }
