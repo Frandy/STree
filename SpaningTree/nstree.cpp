@@ -109,11 +109,15 @@ void NSTree::FindMinDegV(NGraph* graph, NGraph::ngv_it& minv)
 	for (; it != et; it++)
 	{
 		if ((it->degree) < minv->degree)
+	//	if ((it->degree) >= minv->degree)
 		{
 			minv = it;
 		}
 	}
 }
+
+static int share_c1 = 0;
+static int share_c2 = 0;
 
 NSTNode* NSTree::HOpen(NGraph* graph)
 {
@@ -142,6 +146,7 @@ NSTNode* NSTree::HOpen(NGraph* graph)
 	auto f_it = sharedGraphNodeMap.find(graph);
 	if(f_it!=sharedGraphNodeMap.end())
 	{
+		share_c1++;
 		first = f_it->second;
 		return first;
 	}
@@ -197,6 +202,8 @@ NSTNode* NSTree::HOpen(NGraph* graph)
 		auto nit = sharedNodeMap.insert(make_pair(cn->pr,cn->pr));
 		if(!nit.second)
 		{
+			share_c2++;
+
 			delete (cn->pr);
 			cn->pr = nit.first->second;
 		}
@@ -253,6 +260,7 @@ void NSTree::BFSBuild()
 		layer.pop();
 	}
 	cout << "-BFS build done." << endl;
+	cout << "shared node count: " << share_c1 << "+" << share_c2 << "=" << share_c1+share_c2 << endl;
 }
 
 int NSTree::ReleaseNodeGC()
