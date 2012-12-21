@@ -46,25 +46,30 @@ void NSTree::PrintAllPath()
 {
 	list<NSTNode*> paths;
 	cout << "--- all paths begin..." << endl;
-	CollectTermR(root,paths);
+	int cnt = 0;
+	CollectTermR(root,paths,cnt);
 	cout << "- all paths done." << endl;
+	cout << "path count: " << cnt << endl;
 }
 
 void NSTree::PrintTerm(list<NSTNode*>& paths)
 {
+#ifdef EN_PRINT_TERM
 	for (auto it = paths.begin(), et = paths.end(); it != et; it++)
 	{
 		cout << (*it)->eindex << "\t";
 	}
 	cout << endl;
+#endif
 }
 
-void NSTree::CollectTermR(NSTNode* cn,list<NSTNode*>& paths)
+void NSTree::CollectTermR(NSTNode* cn,list<NSTNode*>& paths,int& cnt)
 {
 	if (cn->eindex == 1)
 	{
 		//cout << "--- cn = 1" << endl;
 		PrintTerm(paths);
+		cnt++;
 	}
 	else if(cn->eindex==0)
 	{
@@ -75,10 +80,10 @@ void NSTree::CollectTermR(NSTNode* cn,list<NSTNode*>& paths)
 	{
 		//cout << "push in cn:" << cn->eindex << endl;
 		paths.push_back(cn);
-		CollectTermR(cn->pl, paths);
+		CollectTermR(cn->pl, paths,cnt);
 		//cout << "pop cn:" << paths.back()->eindex << endl;
 		paths.pop_back();
-		CollectTermR(cn->pr, paths);
+		CollectTermR(cn->pr, paths,cnt);
 	}
 }
 
@@ -108,8 +113,8 @@ void NSTree::FindMinDegV(NGraph* graph, NGraph::ngv_it& minv)
 	minv = it++;
 	for (; it != et; it++)
 	{
-		if ((it->degree) < minv->degree)
-	//	if ((it->degree) >= minv->degree)
+	//	if ((it->degree) < minv->degree)
+		if ((it->degree) >= minv->degree)
 		{
 			minv = it;
 		}

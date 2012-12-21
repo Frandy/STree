@@ -47,26 +47,31 @@ void ESTree::InitZeroOne()
 void ESTree::PrintAllPath()
 {
 	list<ESTNode*> paths;
+	int cnt = 0;
 	cout << "--- all paths begin..." << endl;
-	CollectTermR(root, paths);
+	CollectTermR(root, paths,cnt);
 	cout << "- all paths done." << endl;
+	cout << "path count: " << cnt << endl;
 }
 
 void ESTree::PrintTerm(list<ESTNode*>& paths)
 {
+#ifdef EN_PRINT_TERM
 	for (auto it = paths.begin(), et = paths.end(); it != et; it++)
 	{
 		cout << (*it)->eindex << "\t";
 	}
 	cout << endl;
+#endif
 }
 
-void ESTree::CollectTermR(ESTNode* cn, list<ESTNode*>& paths)
+void ESTree::CollectTermR(ESTNode* cn, list<ESTNode*>& paths,int& cnt)
 {
 	if (cn->eindex == 1)
 	{
 		//cout << "--- cn = 1" << endl;
 		PrintTerm(paths);
+		cnt++;
 	}
 	else if (cn->eindex == 0)
 	{
@@ -77,10 +82,10 @@ void ESTree::CollectTermR(ESTNode* cn, list<ESTNode*>& paths)
 	{
 		//cout << "push in cn:" << cn->eindex << endl;
 		paths.push_back(cn);
-		CollectTermR(cn->pl, paths);
+		CollectTermR(cn->pl, paths,cnt);
 	//	cout << "pop cn:" << paths.back()->eindex << endl;
 		paths.pop_back();
-		CollectTermR(cn->pr, paths);
+		CollectTermR(cn->pr, paths,cnt);
 	}
 }
 

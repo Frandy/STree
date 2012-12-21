@@ -126,7 +126,7 @@ public:
 
 private:
 	void PrintTerm(list<ESTNode*>& paths);
-	void CollectTermR(ESTNode* cn, list<ESTNode*>& paths);
+	void CollectTermR(ESTNode* cn, list<ESTNode*>& paths,int& cnt);
 
 	void AddNewNode(int eindex,ESTNode*& node,EGraph*& gl,int& cnt);
 

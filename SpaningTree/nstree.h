@@ -125,7 +125,7 @@ public:
 	// print
 	void PrintAllPath();
 	void PrintTerm(list<NSTNode*>& paths);
-	void CollectTermR(NSTNode* cn,list<NSTNode*>& paths);
+	void CollectTermR(NSTNode* cn,list<NSTNode*>& paths,int& cnt);
 
 	void InitZeroOne();
 	// release memory of graph & node
