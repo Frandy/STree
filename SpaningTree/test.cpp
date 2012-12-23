@@ -19,8 +19,22 @@ using std::unordered_map;
 #include "nstree.h"
 #include "estree.h"
 
-bool CreateNGraph(string name, NGraph* graph);
+#include "orderGraph.h"
+
+
+bool CreateNGraph(string name, NGraph* graph,unordered_map<int, list<int> >& vEdges);
 bool CreateEGraph(NGraph* ng,EGraph* eg);
+
+bool CreateOrderGraph(unordered_map<int, list<int> >& vEdges,NGraph* ng,EGraph* eg)
+{
+	eg->nodenum = vEdges.size();
+	list<Edge> tEdges;
+	OrderGraph order;
+	order.ReOrder(vEdges,ng->edges,tEdges);
+	eg->edges = tEdges;
+	eg->edgenum = tEdges.size();
+	return true;
+}
 
 int main(int argc,char** argv)
 {
@@ -37,7 +51,8 @@ int main(int argc,char** argv)
 
 	/* test nstree */
 	NGraph* graph = new NGraph;
-	bool ok = CreateNGraph(name,graph);
+	unordered_map<int, list<int> > vEdges;
+	bool ok = CreateNGraph(name,graph,vEdges);
 	if(!ok)
 	{
 		cout << "failed to create graph, exit" << endl;
@@ -64,6 +79,18 @@ int main(int argc,char** argv)
 	est->Build();
 	est->PrintAllPath();
 
+	EGraph* orderEg = new EGraph;
+	CreateOrderGraph(vEdges,graph,orderEg);
+//	orderEg->Print();
+//	cout << orderEg->edgenum << endl;
+//	cout << orderEg->nodenum << endl;
+	ESTree* orderEst = new ESTree(orderEg);
+	orderEst->Build();
+	stree->PrintAllPath();
+
+	delete orderEst;
+	delete orderEg;
+
 	delete stree;
 	delete graph;
 
@@ -73,14 +100,14 @@ int main(int argc,char** argv)
 	return 0;
 }
 
-bool CreateNGraph(string name, NGraph* graph)
+bool CreateNGraph(string name, NGraph* graph,unordered_map<int, list<int> >& vEdges)
 {
 	ifstream fp(name.c_str());
 	string ename, p, n;
 	int ei, vp, vn;
 	unordered_map<string, int> eIndex;
 	unordered_map<string, int> vIndex;
-	unordered_map<int, list<int> > vEdges;
+//	unordered_map<int, list<int> > vEdges;
 	int lcnt = 0;
 	while (true)
 	{

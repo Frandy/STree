@@ -190,8 +190,14 @@ NSTNode* NSTree::HOpen(NGraph* graph)
 	while(it!=et)
 	{
 		cg = new NGraph(*cg); // new NGraph
-		cg->Open(ce);
-
+//		cout << "in HOpen to open edge:" << ce << endl;
+//		cg->Print();
+		if(cg->Open(ce))
+		{
+//			cout << "here happen" << endl;
+			delete cg;
+			break;
+		}
 		// add graph to sharedGraphMap
 		auto git = sharedGraphMap.insert(make_pair(cg,cg));
 		if(!git.second)

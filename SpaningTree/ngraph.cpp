@@ -47,6 +47,8 @@ void NGraph::Print()
 
 void NGraph::FindTwoV(int eindex, es_it& it, int& vp, int& vn)
 {
+//	cout << "to find edge:" << eindex << endl;
+//	this->Print();
 	// edge not find will not happen
 	it = find_if(edges.begin(), edges.end(), [=](Edge& v)->bool{return v.index==eindex;});
 	assert(it != edges.end());
@@ -126,6 +128,8 @@ bool NGraph::Short(int eindex)
 	 * 		erase all the loops
 	 *
 	 */
+//	cout << "to short edge:" << eindex << endl;
+
 	es_it e_it;
 	int vp, vn;
 	FindTwoV(eindex, e_it, vp, vn);
@@ -137,17 +141,26 @@ bool NGraph::Short(int eindex)
 	// collapse the two vertexs, collapse small to large
 	list<int> nedges;
 	MergeEiList(vp_it->edges, vn_it->edges, nedges);
-	vn_it->edges.swap(nedges);
-//	vn_it->edges = nedges;
-	vn_it->Degree();
 	vertexs.erase(vp_it);
-
+	if(!nedges.empty())
+	{
+		vn_it->edges.swap(nedges);
+//		vn_it->edges = nedges;
+		vn_it->Degree();
+	}
+	else
+	{
+		vertexs.erase(vn_it);
+	}
 	// if remain only one vertex, then OK.
-	if (vertexs.size() == 1)
+	if (vertexs.size() == 0)
 		return true;
 
 	// short on all the edges
 	ShortAllEdge(vp, vn);
+
+//	cout << "after short edge:" << eindex << endl;
+//	this->Print();
 
 	return false;
 }
@@ -159,6 +172,7 @@ bool NGraph::Open(int eindex)
 	 * 		find edge, get vertex & erase this edge
 	 * 		remove edge in the vertexs
 	 */
+//	cout << "to open edge:" << eindex << endl;
 	es_it e_it;
 	int vp, vn;
 	FindTwoV(eindex, e_it, vp, vn);
@@ -171,14 +185,22 @@ bool NGraph::Open(int eindex)
 	// remove edge on vertex
 	vp_it->edges.remove(eindex);
 	vp_it->Degree();
+//	cout << vp_it->vertex << ":" << vp_it->degree << endl;
 	// if isolated vertex, terminate
 	if (vp_it->degree == 0)
+	{
+//		cout << "return true" << endl;
 		return true;
+	}
 
 	vn_it->edges.remove(eindex);
 	vn_it->Degree();
+//	cout << vn_it->vertex << ":" << vn_it->degree << endl;
 	if (vn_it->degree == 0)
 		return true;
+//	cout << "after open edge:" << eindex << endl;
+//	this->Print();
+
 	return false;
 }
 
