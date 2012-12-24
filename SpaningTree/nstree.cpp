@@ -113,8 +113,8 @@ void NSTree::FindMinDegV(NGraph* graph, NGraph::ngv_it& minv)
 	minv = it++;
 	for (; it != et; it++)
 	{
-	//	if ((it->degree) < minv->degree)
-		if ((it->degree) >= minv->degree)
+		if ((it->degree) < minv->degree)
+	//	if ((it->degree) >= minv->degree)
 		{
 			minv = it;
 		}

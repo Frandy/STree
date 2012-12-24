@@ -50,6 +50,14 @@ public:
 			vEdges.erase(tit);
 			ncnt++;
 			sort(localOrder.begin(),localOrder.end());
+
+			cout << "ordered patial edges:";
+			for(auto t_it=localOrder.begin(),t_et=localOrder.end();t_it!=t_et;t_it++)
+			{
+				cout << edgeV[t_it->second] << "\t";
+			}
+			cout << endl;
+
 			for(auto o_it=localOrder.begin(),o_et=localOrder.end();o_it!=o_et;o_it++)
 			{
 				Edge& eg = edgeV[o_it->second];
@@ -71,7 +79,11 @@ public:
 		for(auto it=tit,et=vEdges.end();it!=et;it++)
 		{
 			int cdeg = it->second.size();
-			if(cdeg>deg)
+			if(cdeg<deg)
+			{
+				tit = it;
+			}
+			else if(cdeg==deg && it->first < tit->first)
 			{
 				tit = it;
 			}
@@ -98,7 +110,73 @@ public:
 			cout << endl;
 		}
 	}
+
+	void NearMinDegOrder(unordered_map<int,list<int> >& vEdges,list<Edge>& edges,list<Edge>& orderedEdge)
+	{
+		vector<Edge> edgeV;
+		L2V(edges,edgeV);
+		int k = 2;
+		int ncnt = 0;
+		int N = vEdges.size();
+		unordered_map<int, list<int> >::iterator tit;
+		FindMaxDegV(vEdges, tit);
+		int nextV = tit->first;
+
+		while (ncnt < N - 1)
+		{
+			//			PrintVEdge(vEdges);
+			tit = vEdges.find(nextV);
+			//			cout << "the max degree vertex:" << tit->first << endl;
+			vector<pair<int, int> > localOrder;
+			for (auto e_it = tit->second.begin(), e_et = tit->second.end(); e_it
+					!= e_et; e_it++)
+			{
+				//				cout << "\tprocess egde:" << (*e_it) << endl;
+				int ap = AnotherV(edgeV[*e_it], tit->first);
+				localOrder.push_back(make_pair(vEdges[ap].size(), *e_it));
+				vEdges[ap].remove(*e_it);
+			}
+			vEdges.erase(tit);
+			ncnt++;
+			sort(localOrder.begin(), localOrder.end());
+			for (auto o_it = localOrder.begin(), o_et = localOrder.end(); o_it
+					!= o_et; o_it++)
+			{
+				Edge& eg = edgeV[o_it->second];
+				orderedEdge.push_back(Edge(k++, eg.vp, eg.vn));
+			}
+			nextV = localOrder.front().second;
+		}
+	}
+	void JustReOrder(unordered_map<int,list<int> >& vEdges,list<Edge>& edges,list<Edge>& orderedEdge)
+		{
+			vector<Edge> edgeV;
+			L2V(edges,edgeV);
+			int k = 2;
+			int ncnt = 0;
+			int N = vEdges.size();
+			while(ncnt<N-1)
+			{
+	//			PrintVEdge(vEdges);
+				unordered_map<int,list<int> >::iterator tit;
+				FindMaxDegV(vEdges,tit);
+	//			cout << "the max degree vertex:" << tit->first << endl;
+				vector<pair<int,int> > localOrder;
+				for(auto e_it=tit->second.begin(),e_et=tit->second.end();e_it!=e_et;e_it++)
+				{
+	//				cout << "\tprocess egde:" << (*e_it) << endl;
+					Edge& eg = edgeV[*e_it];
+					int ap = AnotherV(edgeV[*e_it], tit->first);
+					orderedEdge.push_back(Edge(k++,eg.vp,eg.vn));
+					vEdges[ap].remove(*e_it);
+				}
+				vEdges.erase(tit);
+				ncnt++;
+			}
+		}
 };
+
+
 
 
 #endif /* ORDERGRAPH_H_ */

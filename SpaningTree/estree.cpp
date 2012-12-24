@@ -12,6 +12,10 @@ using std::cin;
 #include <utility>
 using std::make_pair;
 
+#include <ctime>
+using std::clock;
+using std::clock_t;
+
 #include "egraph.h"
 #include "estree.h"
 
@@ -121,7 +125,7 @@ void ESTree::AddNewNode(int eindex,ESTNode*& node,EGraph*& gl,int& cnt)
 		gl = git.first->second;
 	}
 
-	node = new ESTNode(eindex + 1, gl);
+	node = new ESTNode(eindex, gl);
 	auto nit = sharedNodeMap.insert(make_pair(node,node));
 	if(nit.second)
 	{
@@ -130,6 +134,7 @@ void ESTree::AddNewNode(int eindex,ESTNode*& node,EGraph*& gl,int& cnt)
 	}
 	else
 	{
+//		cout << "sharing node:" << node->eindex << "\t:"<< node << endl;
 		delete (node);
 		cnt++;
 		node = nit.first->second;
@@ -158,7 +163,7 @@ void ESTree::BFSBuild()
 			cn->pl = pZeroESTNode;
 		else
 		{
-			AddNewNode(cn->eindex,cn->pl,gl,cnt);
+			AddNewNode(cn->eindex+1,cn->pl,gl,cnt);
 		}
 
 		// open eindex to get pr
@@ -168,12 +173,13 @@ void ESTree::BFSBuild()
 			cn->pr = pZeroESTNode;
 		else
 		{
-			AddNewNode(cn->eindex,cn->pr,gr,cnt);
+			AddNewNode(cn->eindex+1,cn->pr,gr,cnt);
 		}
 /*
-		 cout << "-- node: " << cn->eindex << endl;
+		 cout << "-- node: " << cn->eindex << "\t" << cn << ":" << cn->graph << endl;
 		 cn->graph->Print();
-		 cout << "\tpl:" << cn->pl->eindex << "\t pr:" << cn->pr->eindex << endl;
+		 cout << "\tpl:" << cn->pl->eindex << "\t:" << cn->pl << endl;
+		 cout << "\tpr:" << cn->pr->eindex << "\t:" << cn->pr << endl;
 */
 		layer.pop_front();
 	}
@@ -339,10 +345,20 @@ void ESTree::Reduce()
 
 void ESTree::Build()
 {
+	clock_t t0 = clock();
 	BFSBuild();
+//	DFSBuild();
 	cout << "total node count: " << nodes.size() << endl;
+	clock_t t1 = clock();
 	ZSuppress();
 	cout << "total node count: " << nodes.size() << endl;
+	clock_t t2 = clock();
 	Reduce();
 	cout << "total node count: " << nodes.size() << endl;
+	clock_t t3 = clock();
+	cout << "timing statistics:" << endl;
+	cout << "\tbuild:\t" << (double(t1-t0)/CLOCKS_PER_SEC) << endl;;
+	cout << "\tzsuppress:\t" << (double(t2-t1)/CLOCKS_PER_SEC) << endl;
+	cout << "\treduce:\t" << (double(t3-t2)/CLOCKS_PER_SEC) << endl;
+	cout << "total time:\t" << (double(t3-t0)/CLOCKS_PER_SEC) << endl;
 }

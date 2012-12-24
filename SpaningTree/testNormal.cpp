@@ -1,7 +1,7 @@
 /*
- * test.cpp
+ * testNormal.cpp
  *
- *  Created on: Dec 12, 2012
+ *  Created on: Dec 24, 2012
  *      Author: chjd
  */
 
@@ -30,21 +30,9 @@ bool CreateOrderGraph(unordered_map<int, list<int> >& vEdges,NGraph* ng,EGraph* 
 
 int main(int argc,char** argv)
 {
-	string name = "tg.txt";
-/*	if(argc==2)
-	{
-		name = argv[1];
-	}
-	else
-	{
-		cout << "usage: stree tg.txt" << endl;
-		return -1;
-	}
-*/
-	name = "rndg.txt";
+	string name = "rndg.txt";
 	GenGraph genGraph;
 	genGraph.Run();
-
 	/* test nstree */
 	NGraph* graph = new NGraph;
 	unordered_map<int, list<int> > vEdges;
@@ -55,13 +43,7 @@ int main(int argc,char** argv)
 		return -1;
 	}
 	graph->Print();
-/*
-	NSTree* stree = new NSTree(graph);
-	stree->Build();
-//	stree->BFSBuild();
 
-	stree->PrintAllPath();
-*/
 	/* test estree */
 	EGraph* eg = new EGraph;
 	ok = CreateEGraph(graph,eg);
@@ -75,18 +57,6 @@ int main(int argc,char** argv)
 	est->Build();
 	est->PrintAllPath();
 
-	EGraph* orderEg = new EGraph;
-	CreateOrderGraph(vEdges,graph,orderEg);
-	orderEg->Print();
-//	cout << orderEg->edgenum << endl;
-//	cout << orderEg->nodenum << endl;
-	ESTree* orderEst = new ESTree(orderEg);
-	orderEst->Build();
-	orderEst->PrintAllPath();
-
-	delete orderEst;
-	delete orderEg;
-
 //	delete stree;
 	delete graph;
 
@@ -95,4 +65,3 @@ int main(int argc,char** argv)
 
 	return 0;
 }
-
