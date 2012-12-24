@@ -42,12 +42,12 @@ int main(int argc,char** argv)
 		cout << "failed to create graph, exit" << endl;
 		return -1;
 	}
-	graph->Print();
+//	graph->Print();
 
 	/* test estree */
 	EGraph* eg = new EGraph;
 	ok = CreateEGraph(graph,eg);
-	eg->Print();
+//	eg->Print();
 	if(!ok)
 	{
 		cout << "failed to create egraph" << endl;

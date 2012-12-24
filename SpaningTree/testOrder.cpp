@@ -44,11 +44,11 @@ int main(int argc,char** argv)
 		cout << "failed to create graph, exit" << endl;
 		return -1;
 	}
-	graph->Print();
+//	graph->Print();
 
 	EGraph* orderEg = new EGraph;
-	orderEg->Print();
 	CreateOrderGraph(vEdges,graph,orderEg);
+//	orderEg->Print();
 	ESTree* orderEst = new ESTree(orderEg);
 	orderEst->Build();
 	orderEst->PrintAllPath();

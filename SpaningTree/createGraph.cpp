@@ -38,7 +38,7 @@ bool CreateNGraph(string name, NGraph* graph,unordered_map<int, list<int> >& vEd
 		vn = nit.first->second;
 		graph->edges.push_back(Edge(ei, vp, vn));
 
-		cout << ename << " -> " << ei << ":" << vp << "," << vn << endl;
+//		cout << ename << " -> " << ei << ":" << vp << "," << vn << endl;
 
 		auto pe_it = vEdges.find(vp);
 		if (pe_it == vEdges.end())

@@ -41,7 +41,7 @@ TEST_ORDER = test_order
 .cpp.o:
 	$(CC) -c $< -o $@ $(CFLAGS) $(INCLUDE)
 
-all:stree
+all:stree test_normal test_order
 
 stree:$(TEST_MAIN_OBJECT) $(OBJECTS)
 	$(CC) $^ -o $@ $(LFLAGS)

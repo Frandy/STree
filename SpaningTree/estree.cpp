@@ -360,5 +360,5 @@ void ESTree::Build()
 	cout << "\tbuild:\t" << (double(t1-t0)/CLOCKS_PER_SEC) << endl;;
 	cout << "\tzsuppress:\t" << (double(t2-t1)/CLOCKS_PER_SEC) << endl;
 	cout << "\treduce:\t" << (double(t3-t2)/CLOCKS_PER_SEC) << endl;
-	cout << "total time:\t" << (double(t3-t0)/CLOCKS_PER_SEC) << endl;
+	cout << "\ttotal time:\t" << (double(t3-t0)/CLOCKS_PER_SEC) << endl;
 }

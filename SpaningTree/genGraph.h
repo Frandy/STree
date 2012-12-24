@@ -29,9 +29,9 @@ public:
 	{
 		std::random_device rd;
 		Gen gen(rd());
-		Dis disv(7, 10);
+		Dis disv(5, 8);
 		tvnum = disv(gen);
-		int emin = tvnum;
+		int emin = tvnum*2;
 		int emax = tvnum*(tvnum-1)/2;
 		Dis dise(emin,emax);
 		tenum = dise(gen);
@@ -44,8 +44,8 @@ public:
 		{
 			tb = dis(gen);
 		}
-		int a = vArray[ta%tvnum];
-		int b = vArray[tb%tvnum];
+		int a = vArray[ta];
+		int b = vArray[tb];
 		if(eRec[a*tvnum+b]!=1)
 		{
 			eArray.push_back(Edge(eArray.size(),a,b));
@@ -64,7 +64,7 @@ public:
 
 		std::random_device rd;
 		Gen tgen(rd());
-		Dis tdis(0,tvnum);
+		Dis tdis(0,tvnum-1);
 
 		while(true)
 		{
@@ -88,6 +88,7 @@ public:
 		Init();
 		GenAllEdge(eArray);
 		SaveAllEdge(eArray);
+//		cout << "vnum:" << tvnum << "\t" << "enum:" << tenum << endl;
 		cout << "generate rndg done." << endl;
 	}
 };

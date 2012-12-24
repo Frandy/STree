@@ -50,14 +50,14 @@ public:
 			vEdges.erase(tit);
 			ncnt++;
 			sort(localOrder.begin(),localOrder.end());
-
+/*
 			cout << "ordered patial edges:";
 			for(auto t_it=localOrder.begin(),t_et=localOrder.end();t_it!=t_et;t_it++)
 			{
 				cout << edgeV[t_it->second] << "\t";
 			}
 			cout << endl;
-
+*/
 			for(auto o_it=localOrder.begin(),o_et=localOrder.end();o_it!=o_et;o_it++)
 			{
 				Edge& eg = edgeV[o_it->second];
