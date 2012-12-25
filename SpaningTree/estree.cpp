@@ -336,7 +336,16 @@ void ESTree::Reduce()
 	int tripleCnt = 0;
 	pZeroESTNode->tid = tripleCnt++;
 	pOneESTNode->tid = tripleCnt++;
+/*	int mint = origin->nodenum;
+	if(mint>32)
+		mint = 20;
+	else if(mint>20)
+		mint = 14;
+	mint = 2 << mint;
+	sharedTripleMap = SharedTripleMapT(mint);
+*/
 	ReduceNodeR(root,visit,tripleCnt);
+//	cout << "triple load factor:" << sharedTripleMap.load_factor() << endl;
 	sharedTripleMap.clear();
 	int cnt = ReleaseNodeGC();
 	cout << "- reduce done." << endl;

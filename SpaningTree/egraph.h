@@ -52,7 +52,8 @@ class EGHash
 public:
 	size_t operator () (const EGraph* g) const
 	{
-		return g->Hash();
+		//return g->Hash();
+		return g->HashByString();
 	}
 };
 

@@ -30,11 +30,11 @@ bool CreateNGraph(string name, NGraph* graph,unordered_map<int, list<int> >& vEd
 			cerr << "error input at line " << lcnt << ": " << ename << endl;
 			return false;
 		}
-	//	auto pit = vIndex.insert(make_pair(p, (int)vIndex.size()));
-		auto pit = vIndex.insert(make_pair(p, stoi(p)));
+		auto pit = vIndex.insert(make_pair(p, (int)vIndex.size()));
+	//	auto pit = vIndex.insert(make_pair(p, stoi(p)));
 		vp = pit.first->second;
-	//	auto nit = vIndex.insert(make_pair(n, (int)vIndex.size()));
-		auto nit = vIndex.insert(make_pair(n, stoi(n)));
+		auto nit = vIndex.insert(make_pair(n, (int)vIndex.size()));
+	//	auto nit = vIndex.insert(make_pair(n, stoi(n)));
 		vn = nit.first->second;
 		graph->edges.push_back(Edge(ei, vp, vn));
 

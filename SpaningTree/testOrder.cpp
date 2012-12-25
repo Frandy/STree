@@ -31,10 +31,16 @@ bool CreateOrderGraph(unordered_map<int, list<int> >& vEdges,NGraph* ng,EGraph* 
 int main(int argc,char** argv)
 {
 	string name = "rndg.txt";
+	if(argc<2)
+	{
+		GenGraph genGraph;
+		genGraph.Run();
+	}
+	else
+	{
+		name = argv[1];
+	}
 
-/*	GenGraph genGraph;
-	genGraph.Run();
-*/
 	/* test nstree */
 	NGraph* graph = new NGraph;
 	unordered_map<int, list<int> > vEdges;

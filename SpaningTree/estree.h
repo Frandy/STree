@@ -16,6 +16,11 @@ using std::queue;
 using std::stack;
 #include <unordered_map>
 using std::unordered_map;
+#include <map>
+using std::map;
+
+#include <string>
+using std::u32string;
 
 #include "egraph.h"
 class EGraph;
@@ -77,12 +82,35 @@ public:
 class ETripleHash
 {
 public:
+	std::hash<u32string> hash_fn;
+public:
 	bool operator () (const ESTNode* cn) const
 	{
-		size_t t = cn->eindex << 10;
-		t = t | (cn->pl->tid << 10);
-		t = t | (cn->pr->tid << 10);
-		return t;
+	/*
+		int symbId = cn->eindex;
+		int leftId = cn->pl->tid;
+		int rightId = cn->pr->tid;
+		int al = (int)cn->pl;
+		int ar = (int)cn->pr;
+		size_t value = 0;
+	//	value = (symbId*symbId)+(leftId*leftId<<8)+(rightId*rightId<<16);
+		value = (symbId^leftId)<<8;
+		value ^= (leftId^rightId);
+		value ^= (al << 8) ^ (ar<<2);
+	//	value = value&0x7FFFFFFF;
+	//	cout << "triple hash value: " << value << endl;
+		return value;
+	*/
+
+		u32string str(3,char32_t(0));
+		str[0] = (char32_t(cn->eindex));
+//		str[1] = (char32_t(cn->pl->eindex));
+//		str[2] = (char32_t(cn->pr->eindex));
+		str[1] = (char32_t(cn->pl->tid));
+		str[2] = (char32_t(cn->pr->tid));
+//		str[5] = (char32_t(int(cn->pl)));
+//		str[6] = (char32_t(int(cn->pr)));
+		return hash_fn(str);
 	}
 };
 
@@ -94,6 +122,24 @@ public:
 		return (a->eindex==b->eindex &&
 				a->pl->tid==b->pl->tid &&
 				a->pr->tid==b->pr->tid);
+	}
+};
+
+class ETripleLessThan
+{
+public:
+	bool operator () (const ESTNode* a,const ESTNode* b) const
+	{
+		typedef long long unsigned int UINT64;
+		typedef unsigned int UINT32;
+		UINT64 ta,tb;
+		ta = ((UINT64(a->eindex)) << 54) \
+				| ((UINT64((UINT32)(a->pl->tid)&0x08FFFFFF)) << 27) \
+				| (UINT64((UINT32)(a->pl->tid)&0x08FFFFFF));
+		tb = ((UINT64(b->eindex)) << 54) \
+				| ((UINT64((UINT32)(b->pl->tid)&0x08FFFFFF)) << 27) \
+				| (UINT64((UINT32)(b->pl->tid)&0x08FFFFFF));
+		return ta<tb;
 	}
 };
 
@@ -111,7 +157,9 @@ private:
 	// for sharing
 	unordered_map<EGraph*,EGraph*,EGHash,EGEqual> sharedGraphMap;
 	unordered_map<ESTNode*,ESTNode*,ENodeHash,ENodeEqual> sharedNodeMap;
-	unordered_map<ESTNode*,ESTNode*,ETripleHash,ETripleEqual> sharedTripleMap;
+//	typedef unordered_map<ESTNode*,ESTNode*,ETripleHash,ETripleEqual> SharedTripleMapT;
+	typedef map<ESTNode*,ESTNode*,ETripleLessThan> SharedTripleMapT;
+	SharedTripleMapT sharedTripleMap;
 
 public:
 	// construct
