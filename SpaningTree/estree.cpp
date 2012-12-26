@@ -118,7 +118,9 @@ void ESTree::ReleaseAllNode()
 
 void ESTree::AddNewNode(int eindex,ESTNode*& node,EGraph*& gl,int& cnt)
 {
+//	cout << "to insert graph" << endl;
 	auto git = sharedGraphMap.insert(make_pair(gl,gl));
+//	cout << "insert done." << endl;
 	if(!git.second)
 	{
 		delete gl;
@@ -127,6 +129,7 @@ void ESTree::AddNewNode(int eindex,ESTNode*& node,EGraph*& gl,int& cnt)
 
 	node = new ESTNode(eindex, gl);
 	auto nit = sharedNodeMap.insert(make_pair(node,node));
+//	cout << "node map insert done." << endl;
 	if(nit.second)
 	{
 		layer.push_back(node);
@@ -149,6 +152,12 @@ void ESTree::BFSBuild()
 //	origin->Print();
 	layer.push_back(root);
 	nodes.push_back(root);
+	EGraph* empty = new EGraph;
+#if TDENSEMAP
+	sharedGraphMap.set_empty_key(empty);
+	sharedNodeMap.set_empty_key(pZeroESTNode);
+//	cout << "here" << endl;
+#endif
 	int cnt=0;	// cnt share node during construct
 	while (!layer.empty())
 	{
@@ -312,6 +321,10 @@ void ESTree::ReduceNodeR(ESTNode* cn,bool visit,int& tripleCnt)
 	if(cn->pr->mark)
 		cn->pr = cn->pr->pshare;
 
+#if TMAP | TDENSEMAP
+	cn->TripleValue();
+#endif
+
 	auto it = sharedTripleMap.insert(make_pair(cn,cn));
 	if(it.second)
 	{
@@ -344,6 +357,10 @@ void ESTree::Reduce()
 	mint = 2 << mint;
 	sharedTripleMap = SharedTripleMapT(mint);
 */
+#if TDENSEMAP
+	sharedTripleMap.set_empty_key(pZeroESTNode);
+#endif
+
 	ReduceNodeR(root,visit,tripleCnt);
 //	cout << "triple load factor:" << sharedTripleMap.load_factor() << endl;
 	sharedTripleMap.clear();
@@ -351,6 +368,71 @@ void ESTree::Reduce()
 	cout << "- reduce done." << endl;
 	cout << "reduce node count: " << cnt << endl;
 }
+
+void ESTree::ReduceNodeN(ESTNode* cn,bool visit,int& tripleCnt)
+{
+	if(cn->visit==visit)
+		return;
+//	assert(cn->pl->visit==visit);
+//	assert(cn->pr->visit==visit);
+
+	if(cn->pl->mark)
+		cn->pl = cn->pl->pshare;
+	if(cn->pr->mark)
+		cn->pr = cn->pr->pshare;
+
+#if TMAP | TDENSEMAP
+	cn->TripleValue();
+#endif
+
+	auto it = sharedTripleMap.insert(make_pair(cn,cn));
+	if(it.second)
+	{
+		cn->tid = tripleCnt++;
+	}
+	else
+	{
+		cn->mark = true;
+		cn->pshare = it.first->second;
+	}
+
+	cn->visit = visit;
+	return;
+}
+
+void ESTree::ReduceN()
+{
+	cout << "-- reduce begin..." << endl;
+	bool visit = !(root->visit);
+	pZeroESTNode->visit = visit;
+	pOneESTNode->visit = visit;
+	int tripleCnt = 0;
+	pZeroESTNode->tid = tripleCnt++;
+	pOneESTNode->tid = tripleCnt++;
+/*	int mint = origin->nodenum;
+	if(mint>32)
+		mint = 20;
+	else if(mint>20)
+		mint = 14;
+	mint = 2 << mint;
+	sharedTripleMap = SharedTripleMapT(mint);
+*/
+#if TDENSEMAP
+	sharedTripleMap.set_empty_key(pZeroESTNode);
+#endif
+
+	for(auto r_it=nodes.rbegin(),r_et=nodes.rend();r_it!=r_et;r_it++)
+	{
+		ReduceNodeN(*r_it,visit,tripleCnt);
+	}
+
+//	cout << "triple load factor:" << sharedTripleMap.load_factor() << endl;
+	sharedTripleMap.clear();
+	int cnt = ReleaseNodeGC();
+	cout << "- reduce done." << endl;
+	cout << "reduce node count: " << cnt << endl;
+}
+
 
 void ESTree::Build()
 {
@@ -362,7 +444,7 @@ void ESTree::Build()
 	ZSuppress();
 	cout << "total node count: " << nodes.size() << endl;
 	clock_t t2 = clock();
-	Reduce();
+	ReduceN();
 	cout << "total node count: " << nodes.size() << endl;
 	clock_t t3 = clock();
 	cout << "timing statistics:" << endl;

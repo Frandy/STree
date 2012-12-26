@@ -25,6 +25,19 @@ using std::u32string;
 #include "egraph.h"
 class EGraph;
 
+#define TDENSEMAP 1
+
+#if TDENSEMAP
+#include <sparsehash/dense_hash_map>
+using google::dense_hash_map;
+#endif
+
+#define TMAP 0
+
+typedef long long unsigned int UINT64;
+typedef unsigned int UINT32;
+
+
 class ESTNode
 {
 public:
@@ -39,25 +52,26 @@ public:
 
 	int tid;	// triple index, for reduce
 	ESTNode* pshare;	// shared triple,
+//	UINT64 tvalue;
+	u32string tvalue;
 
 public:
 	ESTNode()=default;
 	ESTNode(int e, EGraph* g);
-	size_t Hash() const
+
+	void TripleValue()
 	{
 /*
-		size_t t = graph->Hash();
-		return (eindex*eindex + t*t);
+		tvalue = ((UINT64(eindex)) << 54) \
+						| ((UINT64((UINT32)(pl->tid)&0x08FFFFFF)) << 27) \
+						| (UINT64((UINT32)(pl->tid)&0x08FFFFFF));
 */
-/* since each node with one graph, instead of graph-pair,
- * address of graph are the same <==> graph are the same, when graph sharing are used
- */
-		return (eindex<<24) | ((size_t)graph & 0x00FFFFFF);
-	}
-	friend bool operator == (const ESTNode& a,const ESTNode& b)
-	{
-		EGEqual gequal;
-		return (a.eindex==b.eindex) && (gequal(a.graph,b.graph));
+
+		tvalue = u32string(3,char32_t(0));
+		tvalue[0] = (char32_t(eindex));
+		tvalue[1] = (char32_t(pl->tid));
+		tvalue[2] = (char32_t(pr->tid));
+
 	}
 };
 
@@ -66,7 +80,7 @@ class ENodeHash
 public:
 	size_t operator () (const ESTNode* cn) const
 	{
-		return cn->Hash();
+		return (cn->eindex<<24) | (((size_t)(cn->graph)>>4) & 0x00FFFFFF);
 	}
 };
 
@@ -75,7 +89,11 @@ class ENodeEqual
 public:
 	bool operator () (const ESTNode* a,const ESTNode* b) const
 	{
-		return (a==b)||((*a)==(*b));
+	//	return (a==b)||((*a)==(*b));
+		if(a==b)
+			return true;
+		EGEqual gequal;
+		return (a->eindex==b->eindex) && (gequal(a->graph,b->graph));
 	}
 };
 
@@ -101,7 +119,7 @@ public:
 	//	cout << "triple hash value: " << value << endl;
 		return value;
 	*/
-
+/*
 		u32string str(3,char32_t(0));
 		str[0] = (char32_t(cn->eindex));
 //		str[1] = (char32_t(cn->pl->eindex));
@@ -110,7 +128,8 @@ public:
 		str[2] = (char32_t(cn->pr->tid));
 //		str[5] = (char32_t(int(cn->pl)));
 //		str[6] = (char32_t(int(cn->pr)));
-		return hash_fn(str);
+*/
+		return hash_fn(cn->tvalue);
 	}
 };
 
@@ -125,13 +144,25 @@ public:
 	}
 };
 
+class ETripleNEqual
+{
+public:
+	bool operator () (const ESTNode* a,const ESTNode* b) const
+	{
+		return (a->eindex!=b->eindex ||
+				a->pl->tid!=b->pl->tid ||
+				a->pr->tid!=b->pr->tid);
+	}
+};
+
 class ETripleLessThan
 {
 public:
 	bool operator () (const ESTNode* a,const ESTNode* b) const
 	{
-		typedef long long unsigned int UINT64;
-		typedef unsigned int UINT32;
+/*		ETripleNEqual tnequal;
+		return (a->tvalue < b->tvalue)&&(tnequal(a,b));
+*/		/*
 		UINT64 ta,tb;
 		ta = ((UINT64(a->eindex)) << 54) \
 				| ((UINT64((UINT32)(a->pl->tid)&0x08FFFFFF)) << 27) \
@@ -140,6 +171,17 @@ public:
 				| ((UINT64((UINT32)(b->pl->tid)&0x08FFFFFF)) << 27) \
 				| (UINT64((UINT32)(b->pl->tid)&0x08FFFFFF));
 		return ta<tb;
+		*/
+/*
+		if(a->eindex<b->eindex)
+			return true;
+		else if(a->pl->tid<b->pl->tid)
+			return true;
+		else if(a->pr->tid<b->pl->tid)
+			return true;
+		return false;
+*/
+		return a->tvalue < b->tvalue;
 	}
 };
 
@@ -155,10 +197,22 @@ private:
 	list<ESTNode*> layer; // working layer
 
 	// for sharing
+#if TDENSEMAP
+	dense_hash_map<EGraph*,EGraph*,EGHash,EGEqual> sharedGraphMap;
+	dense_hash_map<ESTNode*,ESTNode*,ENodeHash,ENodeEqual> sharedNodeMap;
+#else
 	unordered_map<EGraph*,EGraph*,EGHash,EGEqual> sharedGraphMap;
 	unordered_map<ESTNode*,ESTNode*,ENodeHash,ENodeEqual> sharedNodeMap;
-//	typedef unordered_map<ESTNode*,ESTNode*,ETripleHash,ETripleEqual> SharedTripleMapT;
+#endif
+#if TMAP
 	typedef map<ESTNode*,ESTNode*,ETripleLessThan> SharedTripleMapT;
+#elif TDENSEMAP
+	typedef dense_hash_map<ESTNode*,ESTNode*,ETripleHash,ETripleEqual> SharedTripleMapT;
+#else
+	typedef unordered_map<ESTNode*,ESTNode*,ETripleHash,ETripleEqual> SharedTripleMapT;
+#endif
+
+
 	SharedTripleMapT sharedTripleMap;
 
 public:
@@ -185,6 +239,10 @@ private:
 	void ZSuppressNodeR(ESTNode* cn,bool visit);
 	void ReduceNodeR(ESTNode* cn,bool visit,int& tripleCnt);
 	int ReleaseNodeGC();
+
+	// non-recursive reduce
+	void ReduceN();
+	void ReduceNodeN(ESTNode* cn,bool visit,int& tripleCnt);
 
 	void InitZeroOne();
 	// release memory of graph & node

@@ -43,8 +43,8 @@ public:
 		Dis dist(5, 10);
 		int sparse = dist(gen);
 		tenum = tvnum * (tvnum - 1) / 2 * sparse / 100;
-		if(tenum<tvnum || tenum>3*tvnum)
-			tenum = tvnum * 2 - 8;
+		if(tenum<1.5*tvnum || tenum>4.5*tvnum)
+			tenum = tvnum * 2.5 - 8;
 		// sparse min = 1/tvnum * 100%
 
 	}

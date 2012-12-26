@@ -74,7 +74,8 @@ size_t EGraph::HashByString() const
 	{
 		int t = it->index * 11 + it->vp * 5 + it->vn;
 		seed_t[i++] = char(t);
-		if (i > 16)
+		//if (i > 16)
+		if (i > 12)
 			break;
 	}
 	std::hash<std::string> hash_fn;
